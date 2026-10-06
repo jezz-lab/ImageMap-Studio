@@ -1,2 +1,2 @@
 # ImageMap-Studio
-This is a tool to get the coordinates of image map
+A simple browser-based tool for creating polygon image map coordinates.
