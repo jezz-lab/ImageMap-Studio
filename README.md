@@ -2,7 +2,7 @@
 
 A simple browser-based tool for creating polygon coordinates for HTML image maps.
 
-**[🌐 Live Demo](https://YOUR-USERNAME.github.io/ImageMap-Studio/)**
+**[🌐 Live Demo](https://jezz-lab.github.io/ImageMap-Studio/)**
 
 ## Features
 
