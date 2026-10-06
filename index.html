@@ -1,0 +1,3368 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Image Map Polygon Editor</title>
+
+<style>
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+body {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+  height: 60px;
+  min-height: 60px;
+
+  background: #111827;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 20px;
+
+  position: relative;
+  z-index: 100;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
+   MAIN PAGE
+========================================================= */
+
+.app {
+  position: relative;
+
+  width: 100%;
+  height: calc(100% - 60px);
+
+  min-width: 0;
+  min-height: 0;
+}
+
+
+/* =========================================================
+   LEFT SIDEBAR
+========================================================= */
+
+.sidebar {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+  bottom: 105px;
+
+  width: 230px;
+
+  background: white;
+
+  border-right: 1px solid #d1d5db;
+
+  padding: 18px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  z-index: 30;
+}
+
+.section-title {
+  margin: 4px 0 10px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  color: #6b7280;
+}
+
+.control-group {
+  margin-bottom: 22px;
+}
+
+.file-button {
+  display: block;
+
+  width: 100%;
+
+  padding: 10px;
+
+  border-radius: 7px;
+
+  background: #2563eb;
+  color: white;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition: background 0.15s;
+}
+
+.file-button:hover {
+  background: #1d4ed8;
+}
+
+#fileInput {
+  display: none;
+}
+
+.image-info {
+  margin-top: 10px;
+
+  padding: 8px;
+
+  background: #f9fafb;
+
+  border-radius: 6px;
+
+  color: #6b7280;
+
+  font-size: 11px;
+  line-height: 1.5;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   ZOOM CONTROLS
+========================================================= */
+
+.zoom-controls {
+  display: grid;
+
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+
+  gap: 5px;
+
+  margin-bottom: 8px;
+}
+
+.zoom-button {
+  height: 34px;
+
+  border: 1px solid #d1d5db;
+
+  background: white;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 17px;
+}
+
+.zoom-button:hover {
+  background: #f3f4f6;
+}
+
+.zoom-value {
+  height: 34px;
+
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 6px;
+
+  background: #f9fafb;
+
+  font-family: monospace;
+
+  font-size: 12px;
+}
+
+.reset-zoom {
+  width: 100%;
+  height: 32px;
+
+  border: 1px solid #d1d5db;
+
+  background: white;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 12px;
+}
+
+.reset-zoom:hover {
+  background: #f3f4f6;
+}
+
+
+/* =========================================================
+   POLYGON BUTTONS
+========================================================= */
+
+.button {
+  width: 100%;
+
+  min-height: 37px;
+
+  padding: 8px 10px;
+
+  margin-bottom: 8px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 7px;
+
+  background: white;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+  text-align: left;
+}
+
+.button:hover {
+  background: #f3f4f6;
+}
+
+.button.primary {
+  background: #2563eb;
+
+  border-color: #2563eb;
+
+  color: white;
+}
+
+.button.primary:hover {
+  background: #1d4ed8;
+}
+
+
+/* =========================================================
+   CENTER WORKSPACE
+========================================================= */
+
+.workspace {
+  position: absolute;
+
+  left: 230px;
+  right: 280px;
+
+  top: 0;
+  bottom: 105px;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: auto;
+
+  padding: 30px;
+
+  background:
+    linear-gradient(
+      45deg,
+      #e5e7eb 25%,
+      transparent 25%
+    ),
+    linear-gradient(
+      -45deg,
+      #e5e7eb 25%,
+      transparent 25%
+    ),
+    linear-gradient(
+      45deg,
+      transparent 75%,
+      #e5e7eb 75%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 75%,
+      #e5e7eb 75%
+    );
+
+  background-size: 20px 20px;
+
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+
+  z-index: 1;
+}
+
+.workspace.drag-over {
+  outline: 3px dashed #2563eb;
+  outline-offset: -8px;
+
+  background-color: #eff6ff;
+}
+
+
+/* =========================================================
+   DROP HINT
+========================================================= */
+
+.drop-hint {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  line-height: 1.5;
+
+  white-space: pre-line;
+
+  pointer-events: none;
+
+  z-index: 10;
+}
+
+.drop-hint.hidden {
+  display: none;
+}
+
+
+/* =========================================================
+   IMAGE AREA
+========================================================= */
+
+#zoomArea {
+  position: relative;
+
+  display: block;
+
+  width: fit-content;
+  height: fit-content;
+
+  margin: auto;
+
+  background: white;
+
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.18);
+}
+
+#mapImage {
+  display: block;
+
+  max-width: none;
+  max-height: none;
+
+  object-fit: fill;
+
+  user-select: none;
+
+  -webkit-user-drag: none;
+
+  cursor: crosshair;
+}
+
+#svgOverlay {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: visible;
+
+  pointer-events: none;
+}
+
+#polygon {
+  fill: rgba(37, 99, 235, 0.20);
+
+  stroke: #2563eb;
+
+  stroke-width: 2;
+
+  vector-effect: non-scaling-stroke;
+
+  pointer-events: none;
+}
+
+#polyline {
+  fill: none;
+
+  stroke: #2563eb;
+
+  stroke-width: 2;
+
+  vector-effect: non-scaling-stroke;
+
+  pointer-events: none;
+}
+
+.point-group {
+  pointer-events: auto;
+
+  cursor: default;
+}
+
+.point-circle {
+  fill: white;
+
+  stroke: #dc2626;
+
+  stroke-width: 2;
+
+  vector-effect: non-scaling-stroke;
+}
+
+.point-number {
+  font-family: Arial, sans-serif;
+
+  font-size: 12px;
+
+  font-weight: bold;
+
+  fill: #dc2626;
+
+  pointer-events: none;
+
+  paint-order: stroke;
+
+  stroke: white;
+
+  stroke-width: 3px;
+
+  vector-effect: non-scaling-stroke;
+}
+
+.point-changing .point-circle {
+  fill: #fef3c7;
+
+  stroke: #f59e0b;
+
+  stroke-width: 3;
+}
+
+
+/* =========================================================
+   RIGHT POINTS PANEL
+========================================================= */
+
+.points-panel {
+  position: absolute;
+
+  right: 0;
+  top: 0;
+  bottom: 105px;
+
+  width: 280px;
+
+  background: white;
+
+  border-left: 1px solid #d1d5db;
+
+  display: flex;
+
+  flex-direction: column;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  z-index: 30;
+}
+
+.points-header {
+  padding: 16px;
+
+  border-bottom: 1px solid #ddd;
+
+  flex-shrink: 0;
+}
+
+.points-title-row {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+}
+
+.points-title {
+  font-size: 15px;
+
+  font-weight: 600;
+}
+
+.point-count {
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  padding: 3px 8px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: bold;
+}
+
+.clear-points-panel {
+  width: 100%;
+
+  margin-top: 10px;
+
+  padding: 8px 10px;
+
+  border: 1px solid #fecaca;
+
+  border-radius: 6px;
+
+  background: #fff;
+
+  color: #dc2626;
+
+  cursor: pointer;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+.clear-points-panel:hover {
+  background: #fef2f2;
+}
+
+#pointsList {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding: 10px;
+}
+
+.point-item {
+  border: 1px solid #e5e7eb;
+
+  border-radius: 8px;
+
+  padding: 10px;
+
+  margin-bottom: 8px;
+
+  background: white;
+}
+
+.point-item:hover {
+  border-color: #93c5fd;
+
+  background: #f8fbff;
+}
+
+.point-item.point-item-changing {
+  border-color: #f59e0b;
+
+  background: #fffbeb;
+}
+
+.point-item-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 6px;
+
+  margin-bottom: 7px;
+}
+
+.point-name {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-weight: 600;
+
+  font-size: 13px;
+
+  min-width: 0;
+}
+
+.point-dot {
+  width: 10px;
+  height: 10px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #dc2626;
+
+  border: 2px solid white;
+
+  box-shadow: 0 0 0 1px #dc2626;
+}
+
+.point-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  flex-shrink: 0;
+}
+
+.change-point {
+  border: 0;
+
+  background: transparent;
+
+  color: #2563eb;
+
+  cursor: pointer;
+
+  padding: 5px 7px;
+
+  border-radius: 5px;
+
+  font-size: 12px;
+}
+
+.change-point:hover {
+  background: #eff6ff;
+}
+
+.change-point.active {
+  background: #fef3c7;
+
+  color: #b45309;
+}
+
+.delete-point {
+  border: 0;
+
+  background: transparent;
+
+  color: #9ca3af;
+
+  cursor: pointer;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 5px;
+
+  font-size: 15px;
+}
+
+.delete-point:hover {
+  background: #fee2e2;
+
+  color: #dc2626;
+}
+
+.coordinates {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 6px;
+}
+
+.coordinate {
+  background: #f3f4f6;
+
+  border-radius: 5px;
+
+  padding: 6px 8px;
+
+  min-width: 0;
+}
+
+.coordinate-label {
+  display: block;
+
+  color: #6b7280;
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+}
+
+.coordinate-value {
+  display: block;
+
+  margin-top: 2px;
+
+  font-family: monospace;
+
+  font-size: 13px;
+
+  font-weight: bold;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.empty-points {
+  padding: 30px 15px;
+
+  text-align: center;
+
+  color: #9ca3af;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   GENERATED HTML OUTPUT
+========================================================= */
+
+.output {
+  position: absolute;
+
+  left: 230px;
+  right: 280px;
+  bottom: 0;
+
+  height: 105px;
+
+  background: white;
+
+  border-top: 1px solid #ddd;
+
+  padding: 10px 15px;
+
+  z-index: 40;
+}
+
+.output-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 6px;
+}
+
+.output-title {
+  font-size: 12px;
+
+  font-weight: bold;
+
+  color: #6b7280;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+#copyButton {
+  flex-shrink: 0;
+
+  border: 1px solid #d1d5db;
+
+  background: white;
+
+  border-radius: 5px;
+
+  padding: 5px 10px;
+
+  cursor: pointer;
+
+  font-size: 12px;
+}
+
+#copyButton:hover {
+  background: #f3f4f6;
+}
+
+#htmlOutput {
+  margin: 0;
+
+  height: 65px;
+
+  overflow: auto;
+
+  background: #111827;
+
+  color: #e5e7eb;
+
+  border-radius: 6px;
+
+  padding: 9px;
+
+  font-family: Consolas, monospace;
+
+  font-size: 12px;
+
+  white-space: pre-wrap;
+
+  word-break: break-all;
+}
+
+
+/* =========================================================
+   TOOLTIP
+========================================================= */
+
+#pointTooltip {
+  position: fixed;
+
+  display: none;
+
+  z-index: 10000;
+
+  padding: 8px 10px;
+
+  background: rgba(17, 24, 39, 0.95);
+
+  color: white;
+
+  border-radius: 6px;
+
+  font-family: monospace;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  pointer-events: none;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .sidebar {
+    width: 200px;
+  }
+
+  .workspace {
+    left: 200px;
+    right: 240px;
+  }
+
+  .points-panel {
+    width: 240px;
+  }
+
+  .output {
+    left: 200px;
+    right: 240px;
+  }
+}
+
+
+/* =========================================================
+   SMALL TABLET / LARGE PHONE
+========================================================= */
+
+@media (max-width: 800px) {
+
+  body {
+    overflow: auto;
+  }
+
+  .header {
+    position: sticky;
+
+    top: 0;
+
+    height: 56px;
+    min-height: 56px;
+
+    padding: 0 14px;
+  }
+
+  .header-title {
+    font-size: 15px;
+  }
+
+  .status {
+    font-size: 11px;
+  }
+
+  .app {
+    height: auto;
+
+    min-height: calc(100dvh - 56px);
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: visible;
+  }
+
+
+  /*
+    Workspace first on smaller screens.
+  */
+
+  .workspace {
+    position: relative;
+
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+
+    width: 100%;
+
+    height: 55vh;
+    min-height: 350px;
+
+    order: 1;
+
+    padding: 20px;
+
+    overflow: auto;
+  }
+
+
+  /*
+    Left controls become a normal section.
+  */
+
+  .sidebar {
+    position: relative;
+
+    left: auto;
+    top: auto;
+    bottom: auto;
+
+    width: 100%;
+
+    order: 2;
+
+    border-right: 0;
+
+    border-top: 1px solid #d1d5db;
+
+    padding: 15px;
+
+    overflow: visible;
+  }
+
+
+  /*
+    Make controls compact on tablet.
+  */
+
+  .sidebar .section-title {
+    margin-top: 12px;
+  }
+
+
+  .zoom-controls {
+    max-width: 300px;
+  }
+
+
+  .reset-zoom {
+    max-width: 300px;
+  }
+
+
+  /*
+    Polygon controls can sit in a row.
+  */
+
+  .sidebar .button {
+    display: inline-block;
+
+    width: calc(33.333% - 6px);
+
+    margin-right: 5px;
+
+    vertical-align: top;
+  }
+
+  .sidebar .button:nth-of-type(3n) {
+    margin-right: 0;
+  }
+
+
+  /*
+    Points panel becomes full width.
+  */
+
+  .points-panel {
+    position: relative;
+
+    right: auto;
+    top: auto;
+    bottom: auto;
+
+    width: 100%;
+
+    min-height: 250px;
+
+    max-height: 420px;
+
+    order: 3;
+
+    border-left: 0;
+
+    border-top: 1px solid #d1d5db;
+
+    overflow: hidden;
+  }
+
+
+  /*
+    Generated HTML becomes normal flow.
+  */
+
+  .output {
+    position: relative;
+
+    left: auto;
+    right: auto;
+    bottom: auto;
+
+    width: 100%;
+
+    height: 120px;
+
+    order: 4;
+
+    border-top: 1px solid #d1d5db;
+
+    padding: 10px 12px;
+  }
+
+
+  #htmlOutput {
+    height: 72px;
+  }
+}
+
+
+/* =========================================================
+   PHONE
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .header {
+    padding: 0 10px;
+  }
+
+  .header-title {
+    font-size: 14px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+  }
+
+  .status {
+    flex-shrink: 0;
+  }
+
+
+  .workspace {
+    height: 50vh;
+
+    min-height: 300px;
+
+    padding: 15px;
+  }
+
+
+  .drop-hint {
+    font-size: 14px;
+
+    padding: 20px;
+  }
+
+
+  .sidebar {
+    padding: 14px;
+  }
+
+
+  /*
+    Stack polygon buttons vertically.
+  */
+
+  .sidebar .button {
+    display: block;
+
+    width: 100%;
+
+    margin-right: 0;
+  }
+
+
+  .zoom-controls {
+    max-width: none;
+  }
+
+  .reset-zoom {
+    max-width: none;
+  }
+
+
+  .points-panel {
+    min-height: 280px;
+
+    max-height: none;
+  }
+
+
+  .point-item-header {
+    align-items: flex-start;
+  }
+
+
+  .point-actions {
+    gap: 2px;
+  }
+
+
+  .change-point {
+    padding: 5px;
+  }
+
+
+  .output {
+    height: 135px;
+  }
+
+
+  #htmlOutput {
+    height: 85px;
+
+    font-size: 11px;
+  }
+
+
+  .output-title {
+    font-size: 10px;
+  }
+
+
+  #copyButton {
+    font-size: 11px;
+
+    padding: 5px 8px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+========================================================= */
+
+@media (max-width: 380px) {
+
+  .header-title {
+    font-size: 12px;
+  }
+
+  .status {
+    font-size: 10px;
+  }
+
+  .workspace {
+    min-height: 260px;
+
+    height: 45vh;
+
+    padding: 10px;
+  }
+
+  .points-header {
+    padding: 12px;
+  }
+
+  #pointsList {
+    padding: 8px;
+  }
+
+  .point-item {
+    padding: 8px;
+  }
+
+  .coordinates {
+    grid-template-columns: 1fr;
+  }
+
+  .output {
+    height: 145px;
+  }
+
+  #htmlOutput {
+    height: 95px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+<title>ImageMap Studio</title>
+
+<div class="header-title">▱ ImageMap Studio</div>
+
+
+  <div class="status">
+    <span class="status-dot"></span>
+    <span id="statusText">Ready</span>
+  </div>
+
+</header>
+
+
+<div class="app">
+
+  <!-- =====================================================
+       LEFT SIDEBAR
+  ====================================================== -->
+
+  <aside class="sidebar">
+
+    <div class="section-title">
+      Image
+    </div>
+
+    <div class="control-group">
+
+      <label
+        class="file-button"
+        for="fileInput"
+      >
+        📁 Choose Image
+      </label>
+
+      <input
+        type="file"
+        id="fileInput"
+        accept="image/*"
+      >
+
+      <div
+        class="image-info"
+        id="imageInfo"
+      >
+        No image selected.
+      </div>
+
+    </div>
+
+
+    <div class="section-title">
+      Zoom
+    </div>
+
+    <div class="zoom-controls">
+
+      <button
+        class="zoom-button"
+        id="zoomOut"
+        type="button"
+      >
+        −
+      </button>
+
+      <div
+        class="zoom-value"
+        id="zoomValue"
+      >
+        100%
+      </div>
+
+      <button
+        class="zoom-button"
+        id="zoomIn"
+        type="button"
+      >
+        +
+      </button>
+
+    </div>
+
+    <button
+      class="reset-zoom"
+      id="resetZoom"
+      type="button"
+    >
+      Reset Zoom
+    </button>
+
+
+    <div
+      class="section-title"
+      style="margin-top:24px;"
+    >
+      Polygon
+    </div>
+
+    <button
+      class="button"
+      id="undoButton"
+      type="button"
+    >
+      ↶ Undo Last Point
+    </button>
+
+    <button
+      class="button"
+      id="openButton"
+      type="button"
+    >
+      ✎ Edit Polygon
+    </button>
+
+    <button
+      class="button primary"
+      id="closeButton"
+      type="button"
+    >
+      ✓ Close Polygon
+    </button>
+
+  </aside>
+
+
+  <!-- =====================================================
+       CENTER WORKSPACE
+  ====================================================== -->
+
+  <main
+    class="workspace"
+    id="workspace"
+  >
+
+    <div
+      class="drop-hint"
+      id="dropHint"
+    >
+      Drag &amp; drop an image here
+    </div>
+
+
+    <div id="zoomArea">
+
+      <img
+        id="mapImage"
+        alt=""
+        draggable="false"
+      >
+
+      <svg id="svgOverlay">
+
+        <polyline
+          id="polyline"
+        ></polyline>
+
+        <polygon
+          id="polygon"
+        ></polygon>
+
+        <g
+          id="svgPoints"
+        ></g>
+
+      </svg>
+
+    </div>
+
+  </main>
+
+
+  <!-- =====================================================
+       POINTS PANEL
+  ====================================================== -->
+
+  <aside class="points-panel">
+
+    <div class="points-header">
+
+      <div class="points-title-row">
+
+        <span class="points-title">
+          Points
+        </span>
+
+        <span
+          class="point-count"
+          id="pointCount"
+        >
+          0
+        </span>
+
+      </div>
+
+
+      <button
+        class="clear-points-panel"
+        id="clearButton"
+        type="button"
+      >
+        🗑 Clear All Points
+      </button>
+
+    </div>
+
+
+    <div id="pointsList">
+
+      <div class="empty-points">
+        Click on the image to add points.
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       GENERATED HTML
+  ====================================================== -->
+
+  <div class="output">
+
+    <div class="output-header">
+
+      <span class="output-title">
+        Generated HTML &lt;area&gt;
+      </span>
+
+      <button
+        id="copyButton"
+        type="button"
+      >
+        📋 Copy
+      </button>
+
+    </div>
+
+
+    <pre id="htmlOutput">&lt;area
+    shape="poly"
+    coords=""
+    href="#"
+    alt=""
+&gt;</pre>
+
+  </div>
+
+</div>
+
+
+<div id="pointTooltip"></div>
+
+
+<script>
+"use strict";
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let points = [];
+
+let polygonClosed = false;
+
+let imageURL = null;
+
+let zoom = 1;
+
+let changingPointIndex = null;
+
+let dropHintTimer = null;
+
+const ZOOM_STEP = 0.10;
+
+const MIN_ZOOM = 0.25;
+
+const MAX_ZOOM = 5;
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const fileInput =
+  document.getElementById("fileInput");
+
+const image =
+  document.getElementById("mapImage");
+
+const workspace =
+  document.getElementById("workspace");
+
+const zoomArea =
+  document.getElementById("zoomArea");
+
+const svgOverlay =
+  document.getElementById("svgOverlay");
+
+const polyline =
+  document.getElementById("polyline");
+
+const polygon =
+  document.getElementById("polygon");
+
+const svgPoints =
+  document.getElementById("svgPoints");
+
+const imageInfo =
+  document.getElementById("imageInfo");
+
+const statusText =
+  document.getElementById("statusText");
+
+const zoomValue =
+  document.getElementById("zoomValue");
+
+const zoomOut =
+  document.getElementById("zoomOut");
+
+const zoomIn =
+  document.getElementById("zoomIn");
+
+const resetZoom =
+  document.getElementById("resetZoom");
+
+const undoButton =
+  document.getElementById("undoButton");
+
+const openButton =
+  document.getElementById("openButton");
+
+const closeButton =
+  document.getElementById("closeButton");
+
+const clearButton =
+  document.getElementById("clearButton");
+
+const pointCount =
+  document.getElementById("pointCount");
+
+const pointsList =
+  document.getElementById("pointsList");
+
+const htmlOutput =
+  document.getElementById("htmlOutput");
+
+const copyButton =
+  document.getElementById("copyButton");
+
+const dropHint =
+  document.getElementById("dropHint");
+
+const pointTooltip =
+  document.getElementById("pointTooltip");
+
+
+/* =========================================================
+   DROP MESSAGE
+========================================================= */
+
+function showDropMessage(message, duration = 1500) {
+
+  clearTimeout(dropHintTimer);
+
+  dropHint.textContent = message;
+
+  dropHint.classList.remove("hidden");
+
+  dropHintTimer =
+    setTimeout(() => {
+
+      dropHint.classList.add("hidden");
+
+    }, duration);
+}
+
+
+/* =========================================================
+   IMAGE VALIDATION
+========================================================= */
+
+function isSupportedImageType(file) {
+
+  if (!file || !file.type) {
+    return false;
+  }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/bmp",
+    "image/tiff",
+    "image/webp"
+  ];
+
+  return allowedTypes.includes(file.type);
+}
+
+
+async function readFileBytes(
+  file,
+  maxBytes = 1048576
+) {
+
+  return file
+    .slice(
+      0,
+      Math.min(file.size, maxBytes)
+    )
+    .arrayBuffer();
+}
+
+
+async function isAnimatedPNG(file) {
+
+  if (file.type !== "image/png") {
+    return false;
+  }
+
+  const buffer =
+    await readFileBytes(file);
+
+  const bytes =
+    new Uint8Array(buffer);
+
+  const text =
+    new TextDecoder("latin1")
+      .decode(bytes);
+
+  return text.includes("acTL");
+}
+
+
+async function isAnimatedWebP(file) {
+
+  if (file.type !== "image/webp") {
+    return false;
+  }
+
+  const buffer =
+    await readFileBytes(file);
+
+  const bytes =
+    new Uint8Array(buffer);
+
+  const text =
+    new TextDecoder("latin1")
+      .decode(bytes);
+
+  return (
+    text.includes("ANIM") ||
+    text.includes("ANMF")
+  );
+}
+
+
+async function validateImageFile(file) {
+
+  if (!file) {
+    return false;
+  }
+
+
+  if (!file.type.startsWith("image/")) {
+
+    alert(
+      "Invalid file\n\n" +
+      "Please choose an image file."
+    );
+
+    return false;
+  }
+
+
+  if (file.type === "image/gif") {
+
+    alert(
+      "Animated images are not supported.\n\n" +
+      "Please choose a static image."
+    );
+
+    return false;
+  }
+
+
+  if (!isSupportedImageType(file)) {
+
+    alert(
+      "Unsupported image format.\n\n" +
+      "Please choose JPG, PNG, BMP, TIFF, or WebP."
+    );
+
+    return false;
+  }
+
+
+  if (await isAnimatedPNG(file)) {
+
+    alert(
+      "Animated images are not supported.\n\n" +
+      "The selected PNG contains animation."
+    );
+
+    return false;
+  }
+
+
+  if (await isAnimatedWebP(file)) {
+
+    alert(
+      "Animated images are not supported.\n\n" +
+      "The selected WebP contains animation."
+    );
+
+    return false;
+  }
+
+
+  return true;
+}
+
+
+/* =========================================================
+   LOAD IMAGE
+========================================================= */
+
+async function loadImageFile(file) {
+
+  const valid =
+    await validateImageFile(file);
+
+  if (!valid) {
+    return false;
+  }
+
+
+  if (imageURL) {
+    URL.revokeObjectURL(imageURL);
+  }
+
+
+  imageURL =
+    URL.createObjectURL(file);
+
+
+  points = [];
+
+  polygonClosed = false;
+
+  changingPointIndex = null;
+
+  zoom = 1;
+
+
+  return new Promise((resolve) => {
+
+    image.onload = function() {
+
+      imageInfo.innerHTML =
+        `<strong>${escapeHTML(file.name)}</strong><br>` +
+        `Original: ${image.naturalWidth} × ${image.naturalHeight}px`;
+
+
+      statusText.textContent =
+        "Image loaded";
+
+
+      fitImageToWorkspace();
+
+      render();
+
+      dropHint.classList.add("hidden");
+
+      resolve(true);
+    };
+
+
+    image.onerror = function() {
+
+      alert(
+        "The image could not be loaded."
+      );
+
+      image.removeAttribute("src");
+
+      resolve(false);
+    };
+
+
+    image.src =
+      imageURL;
+  });
+}
+
+
+/* =========================================================
+   FILE PICKER
+========================================================= */
+
+fileInput.addEventListener(
+  "change",
+  async function() {
+
+    const file =
+      this.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    await loadImageFile(file);
+
+    this.value = "";
+  }
+);
+
+
+/* =========================================================
+   DRAG & DROP
+========================================================= */
+
+let dragDepth = 0;
+
+
+workspace.addEventListener(
+  "dragenter",
+  function(event) {
+
+    event.preventDefault();
+
+    dragDepth++;
+
+    workspace.classList.add(
+      "drag-over"
+    );
+
+
+    if (image.naturalWidth > 0) {
+
+      dropHint.textContent =
+        "Drop a new image will replace the current one.";
+
+    } else {
+
+      dropHint.textContent =
+        "Drag & drop an image here";
+    }
+
+
+    dropHint.classList.remove(
+      "hidden"
+    );
+  }
+);
+
+
+workspace.addEventListener(
+  "dragover",
+  function(event) {
+
+    event.preventDefault();
+
+    workspace.classList.add(
+      "drag-over"
+    );
+
+
+    if (image.naturalWidth > 0) {
+
+      dropHint.textContent =
+        "Drop a new image will replace the current one.";
+
+    } else {
+
+      dropHint.textContent =
+        "Drag & drop an image here";
+    }
+
+
+    dropHint.classList.remove(
+      "hidden"
+    );
+  }
+);
+
+
+workspace.addEventListener(
+  "dragleave",
+  function(event) {
+
+    event.preventDefault();
+
+    dragDepth--;
+
+
+    if (dragDepth > 0) {
+      return;
+    }
+
+
+    dragDepth = 0;
+
+    workspace.classList.remove(
+      "drag-over"
+    );
+
+
+    if (image.naturalWidth === 0) {
+
+      dropHint.textContent =
+        "Drag & drop an image here";
+
+      dropHint.classList.remove(
+        "hidden"
+      );
+
+    } else {
+
+      dropHint.classList.add(
+        "hidden"
+      );
+    }
+  }
+);
+
+
+workspace.addEventListener(
+  "drop",
+  async function(event) {
+
+    event.preventDefault();
+
+    dragDepth = 0;
+
+    workspace.classList.remove(
+      "drag-over"
+    );
+
+
+    const file =
+      event.dataTransfer.files[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    const success =
+      await loadImageFile(file);
+
+
+    if (success) {
+
+      showDropMessage(
+        "Successfully drag & drop an image.\n" +
+        "Drop a new image will replace the current one.",
+        1500
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   FIT IMAGE
+========================================================= */
+
+function fitImageToWorkspace() {
+
+  if (
+    !image.naturalWidth ||
+    !image.naturalHeight
+  ) {
+    return;
+  }
+
+
+  const styles =
+    getComputedStyle(workspace);
+
+
+  const paddingLeft =
+    parseFloat(styles.paddingLeft) || 0;
+
+  const paddingRight =
+    parseFloat(styles.paddingRight) || 0;
+
+  const paddingTop =
+    parseFloat(styles.paddingTop) || 0;
+
+  const paddingBottom =
+    parseFloat(styles.paddingBottom) || 0;
+
+
+  const availableWidth =
+    workspace.clientWidth -
+    paddingLeft -
+    paddingRight;
+
+
+  const availableHeight =
+    workspace.clientHeight -
+    paddingTop -
+    paddingBottom;
+
+
+  const widthRatio =
+    availableWidth /
+    image.naturalWidth;
+
+
+  const heightRatio =
+    availableHeight /
+    image.naturalHeight;
+
+
+  zoom =
+    Math.min(
+      widthRatio,
+      heightRatio,
+      1
+    );
+
+
+  zoom =
+    Math.max(
+      MIN_ZOOM,
+      Math.min(
+        MAX_ZOOM,
+        zoom
+      )
+    );
+
+
+  updateImageSize();
+
+
+  workspace.scrollLeft = 0;
+
+  workspace.scrollTop = 0;
+}
+
+
+/* =========================================================
+   IMAGE SIZE
+========================================================= */
+
+function updateImageSizeWithoutRender() {
+
+  if (
+    !image.naturalWidth ||
+    !image.naturalHeight
+  ) {
+    return;
+  }
+
+
+  const width =
+    image.naturalWidth * zoom;
+
+  const height =
+    image.naturalHeight * zoom;
+
+
+  image.style.width =
+    `${width}px`;
+
+  image.style.height =
+    `${height}px`;
+
+
+  zoomArea.style.width =
+    `${width}px`;
+
+  zoomArea.style.height =
+    `${height}px`;
+
+
+  svgOverlay.setAttribute(
+    "viewBox",
+    `0 0 ${width} ${height}`
+  );
+
+
+  svgOverlay.setAttribute(
+    "width",
+    width
+  );
+
+
+  svgOverlay.setAttribute(
+    "height",
+    height
+  );
+
+
+  zoomValue.textContent =
+    `${Math.round(zoom * 100)}%`;
+}
+
+
+function updateImageSize() {
+
+  updateImageSizeWithoutRender();
+
+  render();
+}
+
+
+/* =========================================================
+   ZOOM
+========================================================= */
+
+function setZoom(newZoom) {
+
+  if (!image.naturalWidth) {
+    return;
+  }
+
+
+  zoom =
+    Math.max(
+      MIN_ZOOM,
+      Math.min(
+        MAX_ZOOM,
+        newZoom
+      )
+    );
+
+
+  updateImageSize();
+}
+
+
+zoomOut.addEventListener(
+  "click",
+  function() {
+
+    setZoom(
+      zoom - ZOOM_STEP
+    );
+  }
+);
+
+
+zoomIn.addEventListener(
+  "click",
+  function() {
+
+    setZoom(
+      zoom + ZOOM_STEP
+    );
+  }
+);
+
+
+resetZoom.addEventListener(
+  "click",
+  function() {
+
+    zoom = 1;
+
+    updateImageSize();
+
+    workspace.scrollLeft = 0;
+
+    workspace.scrollTop = 0;
+  }
+);
+
+
+/* =========================================================
+   CTRL + MOUSE WHEEL ZOOM
+========================================================= */
+
+workspace.addEventListener(
+  "wheel",
+  function(event) {
+
+    if (
+      !event.ctrlKey ||
+      !image.naturalWidth
+    ) {
+      return;
+    }
+
+
+    event.preventDefault();
+
+
+    const oldZoom =
+      zoom;
+
+
+    const rect =
+      image.getBoundingClientRect();
+
+
+    const mouseX =
+      event.clientX -
+      rect.left;
+
+    const mouseY =
+      event.clientY -
+      rect.top;
+
+
+    const imageX =
+      mouseX / oldZoom;
+
+    const imageY =
+      mouseY / oldZoom;
+
+
+    const direction =
+      event.deltaY < 0
+        ? 1
+        : -1;
+
+
+    const newZoom =
+      Math.max(
+        MIN_ZOOM,
+        Math.min(
+          MAX_ZOOM,
+          zoom +
+          direction *
+          ZOOM_STEP
+        )
+      );
+
+
+    if (
+      newZoom === oldZoom
+    ) {
+      return;
+    }
+
+
+    zoom =
+      newZoom;
+
+
+    updateImageSize();
+
+
+    const workspaceRect =
+      workspace.getBoundingClientRect();
+
+
+    const targetX =
+      imageX * zoom -
+      (
+        event.clientX -
+        workspaceRect.left
+      );
+
+
+    const targetY =
+      imageY * zoom -
+      (
+        event.clientY -
+        workspaceRect.top
+      );
+
+
+    workspace.scrollLeft +=
+      targetX;
+
+    workspace.scrollTop +=
+      targetY;
+  },
+  {
+    passive: false
+  }
+);
+
+
+/* =========================================================
+   IMAGE CLICK
+========================================================= */
+
+image.addEventListener(
+  "click",
+  function(event) {
+
+    if (!image.naturalWidth) {
+      return;
+    }
+
+
+    const rect =
+      image.getBoundingClientRect();
+
+
+    const displayX =
+      event.clientX -
+      rect.left;
+
+    const displayY =
+      event.clientY -
+      rect.top;
+
+
+    const originalX =
+      Math.round(
+        displayX / zoom
+      );
+
+    const originalY =
+      Math.round(
+        displayY / zoom
+      );
+
+
+    const x =
+      Math.max(
+        0,
+        Math.min(
+          image.naturalWidth,
+          originalX
+        )
+      );
+
+
+    const y =
+      Math.max(
+        0,
+        Math.min(
+          image.naturalHeight,
+          originalY
+        )
+      );
+
+
+    /*
+      CHANGE MODE
+    */
+
+    if (
+      changingPointIndex !== null
+    ) {
+
+      points[
+        changingPointIndex
+      ] = {
+        x,
+        y
+      };
+
+
+      polygonClosed = false;
+
+      changingPointIndex = null;
+
+      statusText.textContent =
+        "Image loaded";
+
+      render();
+
+      return;
+    }
+
+
+    /*
+      CLOSED POLYGON
+    */
+
+    if (polygonClosed) {
+      return;
+    }
+
+
+    points.push({
+      x,
+      y
+    });
+
+
+    render();
+  }
+);
+
+
+/* =========================================================
+   SVG MARKER CLICK
+========================================================= */
+
+svgPoints.addEventListener(
+  "click",
+  function(event) {
+
+    event.stopPropagation();
+  }
+);
+
+
+/* =========================================================
+   TOOLTIP
+========================================================= */
+
+function showPointTooltip(
+  event,
+  point
+) {
+
+  pointTooltip.textContent =
+    `X: ${point.x}  Y: ${point.y}`;
+
+
+  pointTooltip.style.display =
+    "block";
+
+
+  pointTooltip.style.left =
+    `${event.clientX + 12}px`;
+
+
+  pointTooltip.style.top =
+    `${event.clientY + 12}px`;
+}
+
+
+function hidePointTooltip() {
+
+  pointTooltip.style.display =
+    "none";
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function render() {
+
+  updateImageSizeWithoutRender();
+
+
+  pointCount.textContent =
+    points.length;
+
+
+  const scaledPoints =
+    points.map(point => ({
+      x: point.x * zoom,
+      y: point.y * zoom
+    }));
+
+
+  /*
+    CLOSED POLYGON
+  */
+
+  if (
+    polygonClosed &&
+    points.length >= 3
+  ) {
+
+    polygon.setAttribute(
+      "points",
+      scaledPoints
+        .map(
+          point =>
+            `${point.x},${point.y}`
+        )
+        .join(" ")
+    );
+
+
+    polygon.style.display =
+      "block";
+
+    polyline.style.display =
+      "none";
+
+  } else {
+
+    polygon.style.display =
+      "none";
+
+
+    polyline.setAttribute(
+      "points",
+      scaledPoints
+        .map(
+          point =>
+            `${point.x},${point.y}`
+        )
+        .join(" ")
+    );
+
+
+    polyline.style.display =
+      points.length >= 1
+        ? "block"
+        : "none";
+  }
+
+
+  /*
+    POINT MARKERS
+  */
+
+  svgPoints.innerHTML = "";
+
+
+  points.forEach(
+    (point, index) => {
+
+      const group =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+
+
+      group.classList.add(
+        "point-group"
+      );
+
+
+      if (
+        changingPointIndex ===
+        index
+      ) {
+
+        group.classList.add(
+          "point-changing"
+        );
+      }
+
+
+      const circle =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle"
+        );
+
+
+      circle.classList.add(
+        "point-circle"
+      );
+
+
+      circle.setAttribute(
+        "cx",
+        point.x * zoom
+      );
+
+
+      circle.setAttribute(
+        "cy",
+        point.y * zoom
+      );
+
+
+      circle.setAttribute(
+        "r",
+        10
+      );
+
+
+      const number =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text"
+        );
+
+
+      number.classList.add(
+        "point-number"
+      );
+
+
+      number.setAttribute(
+        "x",
+        point.x * zoom
+      );
+
+
+      number.setAttribute(
+        "y",
+        point.y * zoom
+      );
+
+
+      number.textContent =
+        index + 1;
+
+
+      group.appendChild(circle);
+
+      group.appendChild(number);
+
+
+      group.addEventListener(
+        "mouseenter",
+        event => {
+
+          showPointTooltip(
+            event,
+            point
+          );
+        }
+      );
+
+
+      group.addEventListener(
+        "mousemove",
+        event => {
+
+          showPointTooltip(
+            event,
+            point
+          );
+        }
+      );
+
+
+      group.addEventListener(
+        "mouseleave",
+        hidePointTooltip
+      );
+
+
+      group.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+        }
+      );
+
+
+      svgPoints.appendChild(
+        group
+      );
+    }
+  );
+
+
+  renderPointsPanel();
+
+  renderGeneratedHTML();
+}
+
+
+/* =========================================================
+   POINTS PANEL
+========================================================= */
+
+function renderPointsPanel() {
+
+  if (points.length === 0) {
+
+    pointsList.innerHTML =
+      `
+      <div class="empty-points">
+        Click on the image to add points.
+      </div>
+      `;
+
+    return;
+  }
+
+
+  pointsList.innerHTML = "";
+
+
+  points.forEach(
+    (point, index) => {
+
+      const item =
+        document.createElement("div");
+
+
+      item.className =
+        "point-item";
+
+
+      if (
+        changingPointIndex ===
+        index
+      ) {
+
+        item.classList.add(
+          "point-item-changing"
+        );
+      }
+
+
+      const header =
+        document.createElement("div");
+
+
+      header.className =
+        "point-item-header";
+
+
+      const name =
+        document.createElement("div");
+
+
+      name.className =
+        "point-name";
+
+
+      const dot =
+        document.createElement("span");
+
+
+      dot.className =
+        "point-dot";
+
+
+      const text =
+        document.createElement("span");
+
+
+      text.textContent =
+        `Point ${index + 1}`;
+
+
+      name.appendChild(dot);
+
+      name.appendChild(text);
+
+
+      const actions =
+        document.createElement("div");
+
+
+      actions.className =
+        "point-actions";
+
+
+      /*
+        CHANGE BUTTON
+      */
+
+      const changeButton =
+        document.createElement("button");
+
+
+      changeButton.type =
+        "button";
+
+
+      changeButton.className =
+        "change-point";
+
+
+      changeButton.textContent =
+        changingPointIndex === index
+          ? "Choosing..."
+          : "Change";
+
+
+      if (
+        changingPointIndex ===
+        index
+      ) {
+
+        changeButton.classList.add(
+          "active"
+        );
+      }
+
+
+      changeButton.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+
+          if (
+            changingPointIndex ===
+            index
+          ) {
+
+            changingPointIndex =
+              null;
+
+            statusText.textContent =
+              "Image loaded";
+
+          } else {
+
+            changingPointIndex =
+              index;
+
+            polygonClosed =
+              false;
+
+            statusText.textContent =
+              "Choosing...";
+          }
+
+
+          render();
+        }
+      );
+
+
+      /*
+        DELETE BUTTON
+      */
+
+      const deleteButton =
+        document.createElement("button");
+
+
+      deleteButton.type =
+        "button";
+
+
+      deleteButton.className =
+        "delete-point";
+
+
+      deleteButton.textContent =
+        "×";
+
+
+      deleteButton.title =
+        "Delete point";
+
+
+      deleteButton.addEventListener(
+        "click",
+        event => {
+
+          event.stopPropagation();
+
+
+          points.splice(
+            index,
+            1
+          );
+
+
+          polygonClosed =
+            false;
+
+
+          changingPointIndex =
+            null;
+
+
+          statusText.textContent =
+            image.naturalWidth
+              ? "Image loaded"
+              : "Ready";
+
+
+          render();
+        }
+      );
+
+
+      actions.appendChild(
+        changeButton
+      );
+
+      actions.appendChild(
+        deleteButton
+      );
+
+
+      header.appendChild(name);
+
+      header.appendChild(actions);
+
+
+      item.appendChild(header);
+
+
+      /*
+        COORDINATES
+      */
+
+      const coordinates =
+        document.createElement("div");
+
+
+      coordinates.className =
+        "coordinates";
+
+
+      const xCoordinate =
+        document.createElement("div");
+
+
+      xCoordinate.className =
+        "coordinate";
+
+
+      xCoordinate.innerHTML =
+        `
+        <span class="coordinate-label">
+          X
+        </span>
+        <span class="coordinate-value">
+          ${point.x}
+        </span>
+        `;
+
+
+      const yCoordinate =
+        document.createElement("div");
+
+
+      yCoordinate.className =
+        "coordinate";
+
+
+      yCoordinate.innerHTML =
+        `
+        <span class="coordinate-label">
+          Y
+        </span>
+        <span class="coordinate-value">
+          ${point.y}
+        </span>
+        `;
+
+
+      coordinates.appendChild(
+        xCoordinate
+      );
+
+      coordinates.appendChild(
+        yCoordinate
+      );
+
+
+      item.appendChild(
+        coordinates
+      );
+
+
+      pointsList.appendChild(
+        item
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   UNDO
+========================================================= */
+
+undoButton.addEventListener(
+  "click",
+  function() {
+
+    if (points.length === 0) {
+      return;
+    }
+
+
+    points.pop();
+
+    polygonClosed = false;
+
+    changingPointIndex = null;
+
+
+    statusText.textContent =
+      image.naturalWidth
+        ? "Image loaded"
+        : "Ready";
+
+
+    render();
+  }
+);
+
+
+/* =========================================================
+   CLEAR ALL
+========================================================= */
+
+clearButton.addEventListener(
+  "click",
+  function() {
+
+    points = [];
+
+    polygonClosed = false;
+
+    changingPointIndex = null;
+
+
+    statusText.textContent =
+      image.naturalWidth
+        ? "Image loaded"
+        : "Ready";
+
+
+    render();
+  }
+);
+
+
+/* =========================================================
+   EDIT POLYGON
+========================================================= */
+
+openButton.addEventListener(
+  "click",
+  function() {
+
+    polygonClosed = false;
+
+    changingPointIndex = null;
+
+
+    statusText.textContent =
+      image.naturalWidth
+        ? "Image loaded"
+        : "Ready";
+
+
+    render();
+  }
+);
+
+
+/* =========================================================
+   CLOSE POLYGON
+========================================================= */
+
+closeButton.addEventListener(
+  "click",
+  function() {
+
+    if (points.length < 3) {
+
+      alert(
+        "At least 3 points are required " +
+        "to close the polygon."
+      );
+
+      return;
+    }
+
+
+    polygonClosed = true;
+
+    changingPointIndex = null;
+
+
+    statusText.textContent =
+      "Polygon closed";
+
+
+    render();
+  }
+);
+
+
+/* =========================================================
+   GENERATED HTML
+========================================================= */
+
+function renderGeneratedHTML() {
+
+  const coords =
+    points
+      .map(
+        point =>
+          `${point.x},${point.y}`
+      )
+      .join(",");
+
+
+  htmlOutput.textContent =
+`<area
+    shape="poly"
+    coords="${coords}"
+    href="#"
+    alt=""
+>`;
+}
+
+
+/* =========================================================
+   COPY
+========================================================= */
+
+copyButton.addEventListener(
+  "click",
+  async function() {
+
+    const text =
+      htmlOutput.textContent;
+
+
+    try {
+
+      await navigator.clipboard
+        .writeText(text);
+
+
+      copyButton.textContent =
+        "✓ Copied";
+
+
+      setTimeout(
+        () => {
+
+          copyButton.textContent =
+            "📋 Copy";
+
+        },
+        1200
+      );
+
+    } catch (error) {
+
+      const textarea =
+        document.createElement(
+          "textarea"
+        );
+
+
+      textarea.value =
+        text;
+
+
+      textarea.style.position =
+        "fixed";
+
+      textarea.style.opacity =
+        "0";
+
+
+      document.body.appendChild(
+        textarea
+      );
+
+
+      textarea.select();
+
+
+      try {
+
+        document.execCommand(
+          "copy"
+        );
+
+
+        copyButton.textContent =
+          "✓ Copied";
+
+      } catch (copyError) {
+
+        alert(
+          "Unable to copy automatically. " +
+          "Please copy the HTML manually."
+        );
+      }
+
+
+      document.body.removeChild(
+        textarea
+      );
+
+
+      setTimeout(
+        () => {
+
+          copyButton.textContent =
+            "📋 Copy";
+
+        },
+        1200
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+}
+
+
+/* =========================================================
+   RESPONSIVE RESIZE
+========================================================= */
+
+let resizeTimer = null;
+
+
+window.addEventListener(
+  "resize",
+  function() {
+
+    clearTimeout(
+      resizeTimer
+    );
+
+
+    resizeTimer =
+      setTimeout(
+        () => {
+
+          if (
+            image.naturalWidth &&
+            points.length === 0
+          ) {
+
+            fitImageToWorkspace();
+
+          } else {
+
+            render();
+          }
+
+        },
+        80
+      );
+  }
+);
+
+
+/* =========================================================
+   INITIAL RENDER
+========================================================= */
+
+render();
+
+</script>
+
+</body>
+</html>
