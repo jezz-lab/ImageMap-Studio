@@ -27,7 +27,3 @@ No installation or server is required.
 
 Download or clone the repository and open `index.html` in your web browser.
 
-## GitHub Pages
-
-Hosted for free using GitHub Pages.
-
